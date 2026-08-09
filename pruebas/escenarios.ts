@@ -17,6 +17,7 @@ const { usePermisoStore } = await import('../src/flux/stores/permiso')
 const { useAtsStore } = await import('../src/flux/stores/ats')
 const { useSyncStore, useNetworkStore } = await import('../src/flux/stores/sync')
 const { useBitacoraStore } = await import('../src/flux/stores/bitacora')
+const { useTurnoStore } = await import('../src/flux/stores/turno')
 
 let ok = 0
 let fallos = 0
@@ -148,6 +149,31 @@ verificar('el permiso sigue sin estar vigente', usePermisoStore.getState().estad
 verificar(
   'el intento si queda en la bitacora, marcado como rechazado',
   useBitacoraStore.getState().entradas[0].resultado === 'rechazada',
+)
+
+seccion('E8 · Una accion repetida no se cuenta dos veces')
+
+dispatch({ type: 'turno/cerrar' })
+dispatch({ type: 'turno/iniciar', payload: { obra: 'Torre A', frente: 'Piso 3' } })
+
+const colaPrevia = useSyncStore.getState().cola.length
+// El modo estricto de React dispara este efecto dos veces en desarrollo.
+dispatch({ type: 'permiso/solicitar' })
+dispatch({ type: 'permiso/solicitar' })
+
+verificar(
+  'la segunda solicitud no entra a la cola',
+  useSyncStore.getState().cola.length === colaPrevia + 1,
+)
+verificar(
+  'la repeticion queda marcada como rechazada',
+  useBitacoraStore.getState().entradas[0].resultado === 'rechazada',
+)
+
+dispatch({ type: 'turno/iniciar', payload: { obra: 'Otra', frente: 'Otro' } })
+verificar(
+  'tampoco se abre dos veces el mismo turno',
+  useTurnoStore.getState().obra === 'Torre A',
 )
 
 // ---------------------------------------------------------------------------

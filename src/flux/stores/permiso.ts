@@ -40,7 +40,10 @@ export const usePermisoStore = create<PermisoState>((set, get) => ({
   handle: (a) => {
     switch (a.type) {
       case 'permiso/solicitar':
-        if (get().estado === 'borrador') set({ estado: 'solicitado' })
+        // El modo estricto de React monta dos veces en desarrollo y este caso
+        // llega duplicado. Se rechaza: una solicitud no puede contarse dos veces.
+        if (get().estado !== 'borrador') return false
+        set({ estado: 'solicitado' })
         break
 
       case 'permiso/verificar': {

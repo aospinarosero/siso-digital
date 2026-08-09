@@ -9,7 +9,7 @@ interface TurnoState {
   handle: (a: Action) => boolean | void
 }
 
-export const useTurnoStore = create<TurnoState>((set) => ({
+export const useTurnoStore = create<TurnoState>((set, get) => ({
   abierto: false,
   obra: null,
   frente: null,
@@ -18,6 +18,7 @@ export const useTurnoStore = create<TurnoState>((set) => ({
   handle: (a) => {
     switch (a.type) {
       case 'turno/iniciar':
+        if (get().abierto) return false
         set({
           abierto: true,
           obra: a.payload.obra,

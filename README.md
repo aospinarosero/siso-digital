@@ -135,7 +135,7 @@ Background Sync del Service Worker; el contrato de la capa no cambia.
 
 ## Pruebas
 
-`npm test` ejecuta seis escenarios sobre la capa Flux, sin navegador ni DOM. Que esto sea
+`npm test` ejecuta ocho escenarios sobre la capa Flux, sin navegador ni DOM. Que esto sea
 posible es consecuencia directa del patrón: la lógica de dominio no depende de React.
 
 | Escenario | Qué verifica |
@@ -146,6 +146,8 @@ posible es consecuencia directa del patrón: la lógica de dominio no depende de
 | E4 | Sin red, la evidencia se encola y el flujo no se interrumpe |
 | E5 | Al recuperar la red la cola se drena sola |
 | E6 | Toda acción queda registrada y las auditables marcadas |
+| E7 | Una firma rechazada no viaja al servidor |
+| E8 | Una acción repetida no se cuenta dos veces |
 
 ---
 
