@@ -9,6 +9,8 @@ diseño planteado en la Entrega 1.
 **Maestría en Arquitectura de Software — Politécnico Grancolombiano**
 Carlos Alberto Escobar Murillo · Alejandro Ospina Rosero · Stefhany Alfonso Rincón
 
+**Repositorio:** https://github.com/aospinarosero/siso-digital
+
 ---
 
 ## Cómo ejecutarlo
