@@ -1,0 +1,16 @@
+{
+  "name": "@siso/nucleo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Contrato de acciones, dispatcher y sistema de diseno compartidos por el shell y los remotos",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "zustand": "^5.0.2"
+  }
+}

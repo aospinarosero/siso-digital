@@ -1,27 +1,26 @@
 {
   "name": "siso-digital",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Prototipo funcional - Patron Flux - Arquitectura Front-End Unidad 3",
+  "description": "SISO Digital - arquitectura de microfrontends con Module Federation sobre el patron Flux",
+  "workspaces": [
+    "packages/nucleo",
+    "packages/mf-turno",
+    "packages/mf-ats",
+    "packages/mf-permiso",
+    "packages/shell"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "dev": "npm run build:remotos && npm run servir",
+    "build:remotos": "npm run build -w @siso/mf-turno -w @siso/mf-ats -w @siso/mf-permiso",
+    "servir": "concurrently -n turno,ats,permiso,shell -c blue,green,magenta,yellow \"npm run preview -w @siso/mf-turno\" \"npm run preview -w @siso/mf-ats\" \"npm run preview -w @siso/mf-permiso\" \"npm run dev -w @siso/shell\"",
+    "build": "npm run build --workspaces --if-present",
     "test": "tsx pruebas/escenarios.ts"
   },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "zustand": "^5.0.2"
-  },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
     "tsx": "^4.23.11",
-    "typescript": "^5.6.3",
-    "vite": "^6.0.3"
+    "typescript": "^5.6.3"
   }
 }

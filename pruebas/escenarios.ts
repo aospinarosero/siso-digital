@@ -1,4 +1,4 @@
-// Escenarios de prueba sobre la capa Flux.
+// Escenarios de prueba sobre la capa Flux y sobre la federacion.
 // Corren sin navegador: los stores no dependen del DOM, que es justamente una
 // de las ventajas de testabilidad que da el patron. Ejecutar con: npm test
 
@@ -12,12 +12,16 @@ const memoria = new Map<string, string>()
   length: 0,
 } as Storage
 
-const { dispatch } = await import('../src/flux/dispatcher')
-const { usePermisoStore } = await import('../src/flux/stores/permiso')
-const { useAtsStore } = await import('../src/flux/stores/ats')
-const { useSyncStore, useNetworkStore } = await import('../src/flux/stores/sync')
-const { useBitacoraStore } = await import('../src/flux/stores/bitacora')
-const { useTurnoStore } = await import('../src/flux/stores/turno')
+const nucleo = await import('@siso/nucleo')
+const { dispatch, useSyncStore, useNetworkStore, useBitacoraStore } = nucleo
+const { registrarMicrofrontend, inscritos } = nucleo
+
+// Sin navegador no hay Module Federation, asi que se importan los tres remotos
+// como paquetes locales. Cada modulo se inscribe solo al cargarse: es el mismo
+// mecanismo que en el navegador, solo cambia de donde baja el codigo.
+const { useTurnoStore, manifiesto: manTurno } = await import('@siso/mf-turno/src/store')
+const { useAtsStore } = await import('@siso/mf-ats/src/store')
+const { usePermisoStore } = await import('@siso/mf-permiso/src/store')
 
 let ok = 0
 let fallos = 0
@@ -175,6 +179,41 @@ verificar(
   'tampoco se abre dos veces el mismo turno',
   useTurnoStore.getState().obra === 'Torre A',
 )
+
+seccion('E9 · Los tres remotos se inscriben con su manifiesto')
+
+const cargados = inscritos().map((i) => i.manifiesto.nombre)
+verificar(
+  'los tres dominios quedaron inscritos en el registro',
+  ['mf-turno', 'mf-ats', 'mf-permiso'].every((n) => cargados.includes(n)),
+)
+verificar('ninguno se inscribe dos veces', new Set(cargados).size === cargados.length)
+verificar(
+  'cada remoto declara contra que version del contrato se compilo',
+  inscritos().every((i) => i.manifiesto.contrato === nucleo.VERSION_CONTRATO),
+)
+verificar(
+  'ningun dominio reclama acciones de otro',
+  !manTurno.acciones.some((a) => a.startsWith('ats/') || a.startsWith('permiso/')),
+)
+
+seccion('E10 · Un remoto con contrato incompatible no entra al ciclo')
+
+// Simula el despliegue de un remoto compilado contra otra version mayor: si se
+// inscribiera, reduciria acciones cuyo significado ya cambio.
+const errorReal = console.error
+console.error = () => {}
+registrarMicrofrontend(
+  { nombre: 'mf-futuro', contrato: '2.0.0', acciones: ['turno/iniciar'] },
+  { getState: () => ({ handle: () => undefined }) },
+)
+console.error = errorReal
+
+verificar(
+  'el registro lo rechaza y no queda inscrito',
+  !inscritos().some((i) => i.manifiesto.nombre === 'mf-futuro'),
+)
+verificar('los remotos compatibles siguen operando', inscritos().length === 3)
 
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(56)}`)
